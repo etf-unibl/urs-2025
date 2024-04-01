@@ -209,8 +209,8 @@ se smješta u memorijsko područje `program` (konstrukcija `> program` na kraju 
 ```
 .text :
 {
-	*(.text*)
-	*(.rodata*)
+    *(.text*)
+    *(.rodata*)
 } > program
 ```
 
@@ -220,10 +220,10 @@ smještaju u `data` memorijsko područje, kao što je prikazano u sljedećem isj
 ```
 .bss (NOLOAD) :
 {
-	__bss_start__ = .;
-	*(.bss*)
-	*(COMMON)
-	__bss_end__ = .;
+    __bss_start__ = .;
+    *(.bss*)
+    *(COMMON)
+    __bss_end__ = .;
 } > data
 ```
 
@@ -243,9 +243,9 @@ se takođe nalazi u `data` memorijskom području.
 ```
 .data :
 {
-	__data_start__ = .;
-	*(.data*);
-	__data_end__ = .;
+    __data_start__ = .;
+    *(.data*);
+    __data_end__ = .;
 } > data
 ```
 
@@ -259,10 +259,10 @@ takođe `NOLOAD` sekcija, koja treba da ima poravnanje `ALIGN(8)` za datu arhite
 ```
 .stack (NOLOAD):
 {
-	. = ALIGN(8);
-	. = . + __stack_size;
-	. = ALIGN(8);
-	__stack_start__ = .;
+    . = ALIGN(8);
+    . = . + __stack_size;
+    . = ALIGN(8);
+    __stack_start__ = .;
 } > data
 ```
 
@@ -286,10 +286,10 @@ razloga se u projektu nalazi i minimalan *startup* kod napisan u asemblerskom je
 
 ```assembly
 _start:
-	ldr     r1, =__stack_start__
-	mov sp,r1
-	bl main
-	b .
+    ldr     r1, =__stack_start__
+    mov sp,r1
+    bl main
+    b .
 ```
 
 Uloga ovog koda je da postavi pokazivač vrha steka (registar `SP`) na vrijednost definisanu u
@@ -547,6 +547,8 @@ Sada ćemo da pokrenemo izvršavanje programa korišćenjem JTAG interfejsa za d
 povežite *DE1-SoC* ploču sa napajanjem i razvojni računar USB kablom sa *USB Blaster* interfejsom
 za programiranje i debagovanje, kao što je prikazano na slici ispod.
 
+![board-usb-blaster](figs/board-usb-blaster.PNG)
+
 Uključite napajanje ploče i pokrenite izvršavanje u *Debug* modu tako što ćete desnim klikom
 na folder projekta iz padajućeg menija izabrati opciju **Debug As**&rarr;**Ashling Arm Hardware Debugging**.
 Pojaviće se prozor za izbor i konfiguraciju interfejsa za debagovanje kao na slici ispod.
@@ -661,7 +663,7 @@ kompletiran.
 
 ```
 _start:
-	/* Initialize .data section */
+    /* Initialize .data section */
     ldr r0, =__text_end__
     ldr r1, =__data_start__
     ldr r2, =__data_end__
@@ -683,7 +685,7 @@ init_bss:
     ldr r1, =__bss_end__
     sub r2, r1, r0
 
-	/* Handle the case when .bss section size is 0 */
+    /* Handle the case when .bss section size is 0 */
     cmp r2, #0
     beq init_stack
     mov r4, #0
@@ -694,10 +696,10 @@ zero_bss:
     bne zero_bss
 
 init_stack:
-	ldr r1, =__stack_start__
-	mov sp, r1
-	bl main
-	b .
+    ldr r1, =__stack_start__
+    mov sp, r1
+    bl main
+    b .
 ```
 
 U okviru prethodnog asemblerskog programa se koriste simboli koji određuju početak i kraj
@@ -711,15 +713,284 @@ nedostajuće simbole u linker skripti, a zatim ponovo kompajlirajte program i u�
 korišćenjem JTAG interfejsa za debagovanje. Potvrdite da inicijalne vrijednosti statičkih i
 globalnih varijabli sada imaju očekivane vrijednosti.
 
+> [!TIP]
+> Svaki put kada ponovo učitavate program na ploču, potrebno je da isključite napajanje
+na ploči ili da pritisnete taster za *hard reset* ploče (`HPS RST`) kako bi se ploča
+postavila u ispravno incijalno stanje.
+
 Po završetku ovog dijela vježbe, predajte sve modifikacije na prethodno kreiranu granu
 za treću vježbu u repozitorijumu.
 
 ## *Hello World* aplikacija za *embedded* sisteme: *LED Blinking*
 
+U drugom dijelu vježbe, demonstriraćemo izradu najjednostavnije aplikacije u *embedded*
+svijetu, koja predstavlja *Hello World* primjer u ovom domenu, a to je kontrola LED
+diode na ploči. U tu svrhu ćemo iskoristiti `HPS_LED` koja je povezana na GPIO53 pin
+*Cyclone V* čipa, što možemo da vidimo iz šeme same ploče (vidi sliku).
+
+![gpio-schematic](figs/gpio-schematic.PNG)
+
+Sa slike takođe vidimo da je na pin GPIO54 povezan korisnički taster `HPS_KEY` čije stanje
+možemo pročitati ako se ovaj pin postavi kao digitalni ulaz.
+
+Lokacija korisničkog tastera i LED diode na ploči, prikazana je na sljedećoj slici.
+
+![board-button-led](figs/board-button-led.PNG)
+
+Kreirajte projekat na sličan način kao u prethodnom dijelu vježbe, s tim što naziv projekta
+treba da bude `blinky`. Nakon što ste kreirali projekat, kompajlirajte ga da dobijete
+izvršni fajl u ELF formatu. Izvršićemo inspekciju dobijenog fajla Komandom
+
+```
+cd Debug
+arm-none-eabi-objdump -d blinky
+```
+
+Ova komanda nam prikazuje disasembliran kod sa asemblerskim instrukcijama i simboličkim
+labelama koji se nalaze u `.text` sekciji. Parcijalan prikaz relevatnih dijelova ovog koda
+dat je ispod.
+
+```
+blinky:     file format elf32-littlearm
+
+
+Disassembly of section .text:
+
+ffff0000 <spin>:
+ffff0000:       e52db004        push    {fp}            @ (str fp, [sp, #-4]!)
+ffff0004:       e28db000        add     fp, sp, #0
+ffff0008:       e24dd00c        sub     sp, sp, #12
+ffff000c:       e50b0008        str     r0, [fp, #-8]
+ffff0010:       ea000000        b       ffff0018 <spin+0x18>
+ffff0014:       e320f000        nop     {0}
+ffff0018:       e51b3008        ldr     r3, [fp, #-8]
+ffff001c:       e2432001        sub     r2, r3, #1
+ffff0020:       e50b2008        str     r2, [fp, #-8]
+ffff0024:       e3530000        cmp     r3, #0
+ffff0028:       1afffff9        bne     ffff0014 <spin+0x14>
+ffff002c:       e320f000        nop     {0}
+ffff0030:       e320f000        nop     {0}
+ffff0034:       e28bd000        add     sp, fp, #0
+ffff0038:       e49db004        pop     {fp}            @ (ldr fp, [sp], #4)
+ffff003c:       e12fff1e        bx      lr
+
+ffff0040 <main>:
+ffff0040:       e92d4800        push    {fp, lr}
+ffff0044:       e28db004        add     fp, sp, #4
+ffff0048:       e24dd008        sub     sp, sp, #8
+ffff004c:       e3a03000        mov     r3, #0
+ffff0050:       e50b3008        str     r3, [fp, #-8]
+ffff0054:       eb00013f        bl      ffff0558 <board_init>
+[...]
+ffff071c:       e28bd000        add     sp, fp, #0
+ffff0720:       e49db004        pop     {fp}            @ (ldr fp, [sp], #4)
+ffff0724:       e12fff1e        bx      lr
+
+ffff0728 <_start>:
+ffff0728:       e59f1008        ldr     r1, [pc, #8]    @ ffff0738 <_start+0x10>
+ffff072c:       e1a0d001        mov     sp, r1
+ffff0730:       ebfffe42        bl      ffff0040 <main>
+ffff0734:       eafffffe        b       ffff0734 <_start+0xc>
+ffff0738:       ffff6008        .word   0xffff6008
+
+ffff073c <iocsr_scan_chain>:
+ffff073c:       300c0300 00000000 0ff00000 00000000     ...0............
+ffff074c:       000300c0 00008000 00080000 18060000     ................
+ffff075c:       18000000 00018060 00020000 00004000     ....`........@..
+ffff076c:       200300c0 10000000 00000000 00000040     ... ........@...
+ffff077c:       00010000 00002000 10018060 06018000     ..... ..`.......
+ffff078c:       06000000 00010018 00006018 00001000     .........`......
+ffff079c:       0000c030 00000000 03000000 0000800c     0...............
+ffff07ac:       00c0300c 00000800                       .0......
+```
+
+Ono što odmah možemo primjetiti je da se na adresi `0xffff0000` nalazi labela `<spin>` koja
+odgovara funkciji `spin()` definisanoj u fajlu `blinky.c`. Međutim, nakon izvršavanja
+inicijalne konfiguracije hardvera od strane *BootROM* koda na platformi, podrazumijevano
+se prelazi na izvršavanje instrukcija počevši od početne adrese *on-chip* SRAM memorije
+(`0xffff0000`). To znači da će se prvo izvršiti instrukcije iz `spin()` funkcije umjesto
+*startup* instrukcija za inicijalizaciju `SP` registra. Kao posljedicu imamo da program uopšte
+ne može da se izvrši jer će doći do *exception*-a zbog neispravno konfigurisane stek memorije.
+Šta se desilo i zašto ovaj problem nismo imali u prethodnom primjeru?
+
+Ulazne sekcije prilikom kreiranja izlaznih sekcija se obično sortiraju prema nazivu fajla,
+a kako je naziv `startup.S` u alfabetu poslije naziva `blinky.c`, tako će i njegove `.text`
+sekcije biti smještene pri kraju. Ovaj problem nismo imali u prethodnom primjeru jer se naziv
+`test-baremetal.c` nalazi poslije `startup.S`. Zaista, ako izlistate izvršni fajl iz prethodnog
+primjera, vidjećete da je prva instrukcija koja se izvršava od adrese `0xffff0000` označena
+labelom `<_start>` što je korektno.
+
+Da bismo riješili ovaj problem, moramo eksplicitno da navedemo naziv objektnog fajla prilikom
+kreiranja `.text` sekcije. U tu svrhu je potrebno modifikovati tekst sekciju tako da ima
+sljedeći izgled.
+
+```
+.text :
+{
+    *startup.o (.text)
+    *(.text*)
+    *(.rodata*)
+} > program
+```
+
+Na ovaj način linkeru govorimo da želimo da ulazna `.text` sekcija iz objektnog fajla
+`startup.o` bude locirana na početku izlazne `.text` sekcije. Ako ponovo prekompajliramo
+projekat i prikažemo disasembliran kod, dobijamo sljedeće.
+
+```
+blinky:     file format elf32-littlearm
+
+
+Disassembly of section .text:
+
+ffff0000 <_start>:
+ffff0000:       e59f1008        ldr     r1, [pc, #8]    @ ffff0010 <_start+0x10>
+ffff0004:       e1a0d001        mov     sp, r1
+ffff0008:       eb000011        bl      ffff0054 <main>
+ffff000c:       eafffffe        b       ffff000c <_start+0xc>
+ffff0010:       ffff6008        .word   0xffff6008
+
+ffff0014 <spin>:
+ffff0014:       e52db004        push    {fp}            @ (str fp, [sp, #-4]!)
+ffff0018:       e28db000        add     fp, sp, #0
+ffff001c:       e24dd00c        sub     sp, sp, #12
+ffff0020:       e50b0008        str     r0, [fp, #-8]
+ffff0024:       ea000000        b       ffff002c <spin+0x18>
+ffff0028:       e320f000        nop     {0}
+ffff002c:       e51b3008        ldr     r3, [fp, #-8]
+ffff0030:       e2432001        sub     r2, r3, #1
+ffff0034:       e50b2008        str     r2, [fp, #-8]
+ffff0038:       e3530000        cmp     r3, #0
+ffff003c:       1afffff9        bne     ffff0028 <spin+0x14>
+ffff0040:       e320f000        nop     {0}
+ffff0044:       e320f000        nop     {0}
+ffff0048:       e28bd000        add     sp, fp, #0
+[...]
+fff0734:       e49db004        pop     {fp}            @ (ldr fp, [sp], #4)
+ffff0738:       e12fff1e        bx      lr
+
+ffff073c <iocsr_scan_chain>:
+ffff073c:       300c0300 00000000 0ff00000 00000000     ...0............
+ffff074c:       000300c0 00008000 00080000 18060000     ................
+ffff075c:       18000000 00018060 00020000 00004000     ....`........@..
+ffff076c:       200300c0 10000000 00000000 00000040     ... ........@...
+ffff077c:       00010000 00002000 10018060 06018000     ..... ..`.......
+ffff078c:       06000000 00010018 00006018 00001000     .........`......
+ffff079c:       0000c030 00000000 03000000 0000800c     0...............
+ffff07ac:       00c0300c 00000800                       .0......
+```
+
+Na taj način smo popravili pomenuti problem i izvršavanje programa počinje sa
+odgovarajućim instrukcijama.
+
+Glavni program u okviru fajla `blinky.c` inicijalizuje lokalnu varijablu `led_state` čija
+vrijednost određuje stanje LED diode (0 znači da je dioda isključena, dok 1 znači da je ona
+uključena). Nakon toga se poziva funkcija `board_init()` koja je implementirana u okviru
+fajla `board_init.c`. Njena implementacija ima sljedeći izgled:
+
+```
+void board_init()
+{
+    // Freeze the IO banks (force safe values during configuration)
+    sysmgr_vioctrl_freeze_req();
+    // Configure IOCSR for bank 7A
+    board_iocsr_config();
+    // Configure pinmux for GPIO1
+    board_pinmux_config();
+    // Unfreeze the IO banks so configured IOCSR values take place
+    sysmgr_vioctrl_thaw_req();
+    // Configure reset manager (reset WD0 and release GPIO1 reset)
+    board_reset_config();
+}
+```
+
+Implementacija svake funkcije koja se poziva nalazi se u istom fajlu, a detalji o registrima
+kojima se u tom smislu pristupa mogu da se vide u okviru specifikacije *Cyclone V* čipa
+i njegove [mape registara](https://www.intel.com/content/www/us/en/programmable/hps/cyclone-v/hps.html).
+Svaka funkcija je detaljno propraćena komentarima, pa se studentima preporučuje da izdvoje
+malo vremena i analiziraju dati kod.
+
+U osnovi, inicijalizacija ploče se svodi na zamrzavanje ulazno-izlaznih banki čipa
+prije konfiguracije (funkcijа `sysmgr_vioctrl_freeze_req()`), tj. postavljamo pinove u
+bezbjedno stanje. Nakon toga, preko *Scan Manager* periferije postavljamo konfiguraciju pinova
+čipa (funkcija `board_iocsr_config()`) za banku 7A koja je nama relevantna (na njoj se nalaze
+GPIO pinovi na koje su povezani `HPS_LED` i `HPS_KEY`). Ovom konfiguracijom se postavljaju
+fizičke karakteristike pinova (jačina struje, standard napona, konfiguracija
+*pull-up*/*pull-down* otpornika itd.).
+
+Slijedi *pinumux* konfiguracija za GPIO1 modul koji koristimo u našem programu (funkcija
+`board_pinmux_config()`) koja sa fizičkim pinovima povezuje izlaze GPIO1 kontrolera (GPIO53 i
+GPIO54) kako bismo mogli da kontrolišemo stanje LED diode i čitamo stanje tastera.
+
+Poslije konfiguracije ulazno-izlaznih pinova, odmrzavamo ulazno-izlazne banke (funkcija
+`sysmgr_vioctrl_thaw_req()` kako bi se prethodno postavljena konfiguracija aktuelizovala na
+fizičkim pinovima.
+
+Konačno, pozivamo funkciju `board_reset_config()` koja resetuje *watchdog* tajmer (kako bismo
+izbjegli uzastopno restovanje ploče zbog njegovog preteka) i izvodi iz reset stanja GPIO1 modul,
+kako bismo mogli da pristupimo njegovim registrima.
+
+Nakon inicijalizacije ploče, slijedi postavljanje smjera `HPS_LED` pina tako da on bude izlazni
+(funkcija `set_gpio_dir()`). Na raspolaganju su i druge funkcije za manipulaciju sa GPIO pinovima
+na GPIO1 kontroleru, `write_gpio()` i `read_gpio()`, koje omogućavaju postavljanje vrijednosti
+izlaznog pina i čitanje stanja ulaznog pina, respektivno. Sve pomenute funkcije implementirane
+su u fajlu `gpio.c`.
+
+Konačno, program ulazi u beskonačnu petlju u kojoj otprilike svakih pola sekunde mijenja stanje
+LED diode. Funkcija `spin()` je obična *busy-wait* funkcija koja blokira izvršavanje programa
+(izvršava *nop* instrukcije) za predefinisani vremenski interval (u datom slučaju, pola sekunde
+odgovara vrijednosti 250000 koju prosljeđujemo funkciji).
+
+Nakon osnovnog pregleda datog koda, prelazimo na učitavanje programa i njegovo izvršavanje
+na ciljnoj platformi. Kao i u prethodnom primjeru, koristićemo JTAG interfejs za debagovanje.
+S obzirom da u ovom primjeru pristupamo registrima periferija, bilo bi zgodno da imamo na
+raspolaganju komforan prikaz registara periferija. U tu svrhu možemo u konfiguraciju debagera
+da učitamo SVD fajl sa definicijom svih registara platforme.
+
+U prozoru za selekciju i podešavanje JTAG interfejsa (možete ga prikazati desnim klikom miša
+na folder projekta, a zatim iz padajućeg menija odabrati opciju **Debug As**&rarr;**Debug Configurations...**),
+pod tabulatorom *SVD Path* definišemo putanju do SVD fajla kao što je prikazano na slici ispod.
+
 ![svd-path](figs/svd-path.PNG)
+
+U našem slučaju potrebno je kliknuti na dugme *Browse* a zatim učitati fajl sa lokacije
+`<QUARTUS_INSTALL_DIR>/riscfree/xsvd/cyclonev_hps.svd`.
+
+Sada možete pokrenuti debagovanje (npr. klikom na dugme *Debug*). Nakon inicijalizacije interfejsa
+i učitavanja programa, njegovo izvršavanje će se zaustaviti na početku funkcije *main*. Sada
+postavite prekidnu tačku na liniju `write_gpio(HPS_LED, led_state);` i omogućite prikaz željenih
+periferija (npr. `rstmgr`, `sysmgr` i `gpio1`) kao što je ilustrovano na sljedećoj slici.
 
 ![peripheral-register-selection](figs/peripheral-register-selection.PNG)
 
+Sada možete da izaberete periferiju iz liste i da posmatrate kako se mijenjaju pojedini registri.
+
+Pokrenite izvršavanje programa prethodno definisane prekidne tačke (dugme *Resume*), a kada se
+izvršavanje programa suspenduje u prekdinoj tački, posmatrajte kako se mijenjaju pojedini regstri
+periferija. Jedan takav prikaz za GPIO1 skup registara je dat na slici ispod.
+
 ![gpio1-register-view](figs/gpio1-register-view.PNG)
+
+Eksperimentišite sa izvršavanjem programa i pratite stanje registara periferija, kao i fizičko
+LED diode na ploči. Trebalo bi da se LED dioda naizmjenično uključuje i isključuje svaki put
+kada nastavite sa izvršavanjem programa.
+
+> [!WARNING]  
+> U okviru *Ashling RiscFree IDE for Intel FPGAs* okruženja postoji defekt koji uzrokuje da
+argumenti koji se prosljeđuju funkciji pri izvršavanju u režimu korak po korak uvijek imaju
+vrijednost 0, tako da ovakvim izvršavanjem program neće ispravno raditi (periferije neće biti
+ispravno inicijalizovane). Prema tome, preporučujemo da program debagujete korišćenjem
+isključivo prekidnih tačaka.
+
+Zaustavite izvršavanje programa i isključite ploču. Obrišite prethodno definisanu prekidnu
+tačku ili je onemogućite u *Breakpoints* prozoru, a zatim ponovo uključite ploču i pokrenite
+izvršavanje programa bez prekidnih tačaka. Nakon što kliknete *Resume* poslije inicijalnog
+suspendovanja programa na početku *main* funkcije, na ploči bi trebalo alternativno da se
+uključuje i isključuje LED dioda sa intervalom od otprilike pola sekunde između promjene stanja.
+
+Modifikujte dati program tako da tasterom `HPS_KEY` kontrolišete rad blinkajuće diode. Potrebno
+je da inicijalno po pokretanju programa LED dioda blinka kao u izvornom primjeru, a kada korisnik
+pritisne taster da se blinkanje zaustavi. Ponovnim pritiskom na taster ponovo aktiviramo blinkanje
+i tako u krug. Za čitanje stanja tastera možete koristiti funkcije implementirane u `gpio.c` fajlu.
 
 Na kraju, predajte sve modifikacije na granu vježbe u repozitorijumu.
