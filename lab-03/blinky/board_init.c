@@ -237,8 +237,13 @@ static void board_pinmux_config()
 {
 	// The address of GPLMUX53 register in system manager
 	volatile int* HPS_SYSMNGR_GPLMUX53_ptr = (int*) 0xFFD086A8;
+	// The address of GPLMUX54 register in system manager
+	volatile int* HPS_SYSMNGR_GPLMUX54_ptr = (int*) 0xFFD086AC;
 
+	// Select GPIO53 to control the pin
 	*HPS_SYSMNGR_GPLMUX53_ptr |= 0x01;
+	// Select GPIO54 to control the pin
+	*HPS_SYSMNGR_GPLMUX54_ptr |= 0x01;
 }
 
 static void board_reset_config()

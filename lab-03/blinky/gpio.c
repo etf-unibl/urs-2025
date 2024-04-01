@@ -28,6 +28,8 @@ void set_gpio_dir(gpio_dir_t dir, unsigned int pin)
 	{
 		// Clear the bit on pin position in direction register (digital input)
 		*(HPS_GPIO1_ptr + 1) &= ~(1 << pin);
+		// Enable debounce if input pin (register gpio_debounce)
+		*(HPS_GPIO1_ptr + 18) &= ~(1 << pin);
 	}
 	else
 	{
@@ -41,8 +43,8 @@ unsigned int read_gpio(unsigned int pin)
 	// Set default to HIGH
 	unsigned read_val = 1;
 
-	// Read the specified GPIO pin state
-	unsigned int value = *HPS_GPIO1_ptr;
+	// Read the specified GPIO pin state (register gpio_ext_porta)
+	unsigned int value = *(HPS_GPIO1_ptr + 20);
 
 	// If the bit on pin position is 0, then return LOW
 	// Otherwise, we return HIGH, which is default
@@ -56,6 +58,7 @@ unsigned int read_gpio(unsigned int pin)
 
 void write_gpio(unsigned int pin, unsigned int value)
 {
+	// Access port data register (gpio_swporta_dr)
 	if (0 == value)
 	{
 		// Set the bit on pin position to LOW
