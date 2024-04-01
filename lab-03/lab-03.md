@@ -661,7 +661,7 @@ nakon čega slijedi postavljanje svih varijabli unutar `.bss` sekcije na 0. Kona
 na prethodni segment koda za inicijalizaciju `SP` registra, čime je proces incijalizacije
 kompletiran.
 
-```
+```assembly
 _start:
     /* Initialize .data section */
     ldr r0, =__text_end__
@@ -888,7 +888,7 @@ vrijednost određuje stanje LED diode (0 znači da je dioda isključena, dok 1 z
 uključena). Nakon toga se poziva funkcija `board_init()` koja je implementirana u okviru
 fajla `board_init.c`. Njena implementacija ima sljedeći izgled:
 
-```
+```c
 void board_init()
 {
     // Freeze the IO banks (force safe values during configuration)
