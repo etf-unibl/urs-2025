@@ -547,7 +547,7 @@ Sada ćemo da pokrenemo izvršavanje programa korišćenjem JTAG interfejsa za d
 povežite *DE1-SoC* ploču sa napajanjem i razvojni računar USB kablom sa *USB Blaster* interfejsom
 za programiranje i debagovanje, kao što je prikazano na slici ispod.
 
-![board-usb-blaster](figs/board-usb-blaster.PNG)
+![board-usb-blaster](figs/board-usb-blaster.jpg)
 
 Uključite napajanje ploče i pokrenite izvršavanje u *Debug* modu tako što ćete desnim klikom
 na folder projekta iz padajućeg menija izabrati opciju **Debug As**&rarr;**Ashling Arm Hardware Debugging**.
@@ -735,7 +735,7 @@ možemo pročitati ako se ovaj pin postavi kao digitalni ulaz.
 
 Lokacija korisničkog tastera i LED diode na ploči, prikazana je na sljedećoj slici.
 
-![board-button-led](figs/board-button-led.PNG)
+![board-button-led](figs/board-button-led.jpg)
 
 Kreirajte projekat na sličan način kao u prethodnom dijelu vježbe, s tim što naziv projekta
 treba da bude `blinky`. Nakon što ste kreirali projekat, kompajlirajte ga da dobijete
