@@ -165,9 +165,10 @@ procesor sa dva jezgra.
 > [!NOTE]
 > Komanda `make` generiše fajlove koji su označeni `*` u listi opcija koju dobijamo komandom
 `make help`. Podrazumijevano, generiše se samo kompresovana slika kernela `zImage`. Ukoliko
-je potrebno da generišete nekompresovanu sliku i nekompresovanu sliku sa *U-Boot* zaglavljem
-(koja se koristi prilikom pokretanja sistema komandom `bootm`), potrebno je da koristite
-komande `make Image` i `make uImage`, respektivno.
+je potrebno da generišete nekompresovanu sliku sa *U-Boot* zaglavljem (koja se koristi prilikom
+pokretanja sistema komandom `bootm`), potrebno je da koristite komandu
+`make LOADADDR=<kernel-load-addr> uImage`, gdje je `<kernel-load-addr>` adresa u RAM memoriji
+od koje se učitava slika kernela.
 
 Nakon kompajliranja, provjerite verziju kernela komandom
 
