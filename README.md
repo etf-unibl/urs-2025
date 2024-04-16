@@ -41,7 +41,7 @@ Npr. ako student predaje rješenje za laboratorijsku vježbu 3, a njegov broj in
 2. [Laboratorijska vježba 2](lab-02/lab-02.md)
 3. [Laboratorijska vježba 3](lab-03/lab-03.md)
 4. [Laboratorijska vježba 4](lab-04/lab-04.md)
-5. [Laboratorijska vježba 5]()
+5. [Laboratorijska vježba 5](lab-05/lab-05.md)
 6. [Laboratorijska vježba 6]()
 7. [Laboratorijska vježba 7]()
 8. [Laboratorijska vježba 8]()
