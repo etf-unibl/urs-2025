@@ -493,6 +493,13 @@ setenv bootargs console=ttyS0,115200n8 rdinit=/sbin/init
 Prethodnom komandom definišemo lokaciju `init` programa koji kernel treba da izvrši pri podizanju
 sistema (`rdinit=` argument komandne linije).
 
+> [!TIP]
+> Kada se koristi *initramfs* podrazumijevano se pokreće `/init` program za inicijalizaciju. Argumentom
+komandne linije `rdinit=` možemo da redefinišemo ovu podrazumijevanu opciju i da specificiramo stvarnu
+lokaciju `init` programa. Alternativno, mogli smo da napravimo simbolički link `/init` tako da
+pokazuje na `/sbin/init`. U tom slučaju, prethodno pomenuti argument komandne linije nije potrebno
+definisati.
+
 Pokrenite proces podizanja sistema komandom
 
 ```
