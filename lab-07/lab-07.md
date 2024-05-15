@@ -262,7 +262,7 @@ karakteristiku na 16 (što predstavlja kod tastera Q).
 > [!NOTE]
 > Kompletnu listu kodova ulaznog podsistema *Linux*-a možete da vidite u [izvornom kodu](https://github.com/torvalds/linux/blob/master/include/uapi/linux/input-event-codes.h).
 
-Ostaje još da modifikujemo opis I2C kontrolera na koji je priključen akcelereometar ADXL345. Iz [električne šeme](docs/DE1-SoC schematic.pdf)
+Ostaje još da modifikujemo opis I2C kontrolera na koji je priključen akcelereometar ADXL345. Iz [električne šeme](docs/de1-soc-schematic.pdf)
 DE1-SoC ploče (strane 5 i 25) možemo da vidimo da je akcelerometar fizički povezan na I2C0 kontroler, tako da je potrebno
 da umjesto `i2c1` čvora, referenciramo `i2c0`. Osim toga, postavljamo i maksimalnu I2C frekvenciju na 100kHz za ovaj uređaj
 dodavanjem karakteristike `clock-frequency = <100000>` odmah ispod `status = "okay"`. Kompletan opis ima sljedeći izgled:
