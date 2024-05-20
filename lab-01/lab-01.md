@@ -98,7 +98,7 @@ Trebalo bi da dobijete sljedeći ispis:
 	Compiler        : gcc-13.2.0
 	C library       : glibc-2.38
 	Debug tools     : gdb-13.2
-	Companion lins  : expat-2.5.0 gettext-0.21 gmp-6.2.1 isl-0.26 libiconv-1.16 mpc-1.2.1
+	Companion libs  : expat-2.5.0 gettext-0.21 gmp-6.2.1 isl-0.26 libiconv-1.16 mpc-1.2.1
 mpfr-4.2.1 ncurses-6.4 zlib-1.2.13 zstd-1.5.5
 	Companion tools :
 ```
@@ -132,6 +132,7 @@ Potrebno je da napravite sljedeće izmjene:
 - U okviru **C-library**:
 	- odaberite **glibc** u **C library** opciji ukoliko već nije odabrana i
 	- odaberite verziju 2.38 u **Version of glibc** opciji
+    - uključite opciju **Enable obsolete libcrypt**
 - U okviru **C compiler**:
 	- postavite **Version of gcc** opciju na 13.2.0 (ako to već nije odabrano)
 	- potvrdite da je omogućena podrška za C++
@@ -152,7 +153,7 @@ korišćenjem komande `./ct-ng show-config`, koja bi trebala da prikaže sljede�
 	Compiler        : gcc-13.2.0
 	C library       : glibc-2.38
 	Debug tools     : gdb-13.2
-	Companion lins  : expat-2.5.0 gettext-0.21 gmp-6.2.1 isl-0.26 libiconv-1.16 mpc-1.2.1
+	Companion libs  : expat-2.5.0 gettext-0.21 gmp-6.2.1 isl-0.26 libiconv-1.16 mpc-1.2.1
 mpfr-4.2.1 ncurses-6.4 zlib-1.2.13 zstd-1.5.5
 	Companion tools :
 ```
