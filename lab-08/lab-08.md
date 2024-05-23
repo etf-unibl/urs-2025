@@ -166,6 +166,12 @@ cd output/images
 sudo dd if=sdcard.img of=/dev/sdb bs=1M
 ```
 
+> [!IMPORTANT]
+> Prije korišćenja komande `dd` potrebno je da demontirate fajl sisteme particija SD kartice (ukoliko su montirane).
+Putanju do foldera koji predstavlja tačku montiranja particija SD kartice možete prikazati komandom `lsblk`. Kao i
+ranije, vodite računa da ovom komandom možete napraviti štetu na fajl sistemu razvojnog računara ako ne specificirate
+odgovarajući uređaj.
+
 Ovako pripremljenu SD karticu umetnite u slot na DE1-SoC ploči i pokrenite izvršavanje.
 
 Prvo ćemo verifikovati ispravnost *U-Boot* okruženja. U tom smislu, prekinite proces podizanja sistema i
