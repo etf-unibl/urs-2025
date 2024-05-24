@@ -47,7 +47,7 @@ u koji kopiramo `defconfig` i DTS fajlove koje smo kreirali u prethodnoj vježbi
 
 ```
 cp <path-to-linux-src>/arch/arm/configs/de1_soc_defconfig board/terasic/de1soc_cyclone5/
-cp <path-to-linux-src>/arch/arm/boot/dts/socfgpa_cyclone5_de1_soc.dts board/terasic/de1soc_cyclone5/
+cp <path-to-linux-src>/arch/arm/boot/dts/socfpga_cyclone5_de1_soc.dts board/terasic/de1soc_cyclone5/
 ```
 
 Osim prethodna dva fajla, potrebno je da pripremimo i fajl kojim opisujemo strukturu
@@ -60,7 +60,7 @@ cp board/altera/socrates_cyclone5/genimage.cfg board/terasic/de1soc_cyclone5/
 ```
 
 Ovako kopiran `genimage.cfg` fajl ćemo editovati i promijeniti naziv DTB fajla u `boot.vfat`
-sekciji. Potrebno je da zamijenimo naziv ovog fajla i da definišemo `socfgpa_cyclone5_de1_soc.dtb`.
+sekciji. Potrebno je da zamijenimo naziv ovog fajla i da definišemo `socfpga_cyclone5_de1_soc.dtb`.
 
 > [!TIP]
 > Konfiguracioni fajl kojim opisujemo strukturu SD kartice ima veliki broj drugih opcija. Na
