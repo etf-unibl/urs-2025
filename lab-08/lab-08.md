@@ -156,7 +156,7 @@ Sada ostaje da sačuvamo konfiguraciju i pokrenemo proces generisanja artifakata
 
 > [!NOTE]
 > Ovako konfigurisano *Buildroot* okruženje zahtjeva oko 6.2GB prostora na disku, a potrebno je oko pola
-sata za generisanje artifakata (testirano na virtuelnoj mašini sa dva jezgra procesora i 3MB radne memorije).
+sata za generisanje artifakata (testirano na virtuelnoj mašini sa dva jezgra procesora i 3GB radne memorije).
 
 Po završetku, svi relevantni fajlovi će da se nalaze u folderu `<buildroot-folder>/output/images`. Dovoljno
 je da prekopirate sliku SD kartice `sdcard.img` sljedećom komandom:
@@ -720,4 +720,172 @@ Po završetku, sačuvajte sve izmjene na granu u sklopu repozitorijuma kursa kao
 
 ## Generisanje sistema korišćenjem *Yocto* alata
 
-TBD
+### Preuzimanje i inicijalna konfiguracija *Yocto* projekta
+
+U ovom dijelu vježbe ćemo se upoznati sa *Yocto build* sistemom. Prvo je potrebno provjeriti da li su instalirani
+svi softverski paketi neophodni za rad sa *Yocto* okruženjem.
+
+```
+sudo apt install gawk wget git diffstat unzip texinfo gcc build-essential chrpath socat cpio python3 python3-pip \
+                 python3-pexpect xz-utils debianutils iputils-ping python3-git python3-jinja2 python3-subunit zstd \
+                 liblz4-tool file locales libacl1
+```
+
+Nakon instalacije zahtjevanih softverskih paketa, kreiraćemo zaseban direktorijum pod nazivom `yocto` u koji ćemo
+smjestiti svu neophodnu infrastrukturu.
+
+```
+mkdir yocto
+cd yocto
+```
+
+Prvi korak je kloniranje referentne *Poky* distribucije.
+
+```
+git clone -b kirkstone git://git.yoctoproject.org/poky
+```
+
+> [!WARNING]
+> Pri kloniranju bilo kojeg *Yocto* sloja, važno je da odaberemo istu granu. U našem slučaju ćemo koristiti LTS
+granu `kirkstone`.
+
+Sljedeći korak je preuzimanje BSP sloja koji obezbjeđuje podršku za *IntelFPGA* platforme kojoj pripada i
+*Cyclone V* koji se nalazi na DE1-SoC ploči.
+
+```
+git clone -b kirkstone git://git.yoctoproject.org/meta-intel-fpga
+```
+
+Prethodno preuzeti BSP sloj (`meta-intel-fpga`) je potrebno dodati u *Yocto* infrastrukturu, a da bismo mogli to
+da uradimo, potrebno je prvo da kreiramo okruženje koje nam omogućava pristup `bitbake` komandama.
+
+```
+source poky/oe-init-build-env build-socfpga
+```
+
+Prethodna komanda kreira folder pod nazivom `build-socfpga` u kojem će se nalaziti svi artifakti dobijeni nakon
+što se *build* proces završi (kao i dodatna infrastruktura neophodna za rad sa *Yocto* okruženjem). Takođe, ova
+komanda nas automatski pozicionira u ovaj folder.
+
+> [!NOTE]
+> Prethodnu komandu je potrebno pokrenuti svaki put kada korisnik želi da radi sa *Yocto* okruženjem, odnosno pri
+otvaranju novog terminala.
+
+Sada možemo komandom `bitbake-layers` da dodamo `meta-intel-fpga` BSP sloj.
+
+```
+bitbake-layers add-layer ../meta-intel-fpga
+```
+
+Sljedećom komandom možemo da potvrdimo da je naš sloj dodan u listu registrovanih *Yocto* slojeva.
+
+```
+bitbake-layers show-layers
+```
+
+Nakon izvršavanja komande, trebalo bi da dobijemo sljedeći listing:
+
+```
+NOTE: Starting bitbake server...
+layer                 path                                      priority
+==========================================================================
+meta                  /home/mknezic/yocto/poky/meta             5
+meta-poky             /home/mknezic/yocto/poky/meta-poky        5
+meta-yocto-bsp        /home/mknezic/yocto/poky/meta-yocto-bsp   5
+meta-intel-fpga       /home/mknezic/yocto/meta-intel-fpga       6
+```
+
+Prije nego što započnemo *build* proces, moramo da definišemo nekoliko stvari unutar lokalne konfiguracije
+(fajl `conf/local.conf`). Prije svega, treba da selektujemo platformu za koju želimo da generišemo artifakte
+(u našem slučaju, to je `cyclone5`). Osim toga, tipično ćemo odabrati željenu verziju kernela i *U-Boot*
+konfiguraciju. Jedan način je da otvorimo fajl `conf/local.conf` bilo kojim tekstualnim editorom i definišemo
+neophodne varijable. Međutim, to možemo da učinimo i prostim dodavanjem sadržaja ovih varijabli na kraj fajla,
+kao što je prikazano sljedećim komandama:
+
+```
+echo "MACHINE = \"cyclone5\"" >> conf/local.conf
+echo "PREFERRED_PROVIDER_virtual/kernel = \"linux-socfpga-lts\"" >> conf/local.conf
+echo "PREFERRED_VERSION_linux-socfpga-lts = \"5.15%\"" >> conf/local.conf
+echo "UBOOT_CONFIG = \"de0-nano-soc\"" >> conf/local.conf
+```
+
+Ako sada izlistamo sadržaj lokalne konfiguracije
+
+```
+cat conf/local.conf
+```
+
+na kraju fajla bi trebalo da dobijemo sljedeći sadržaj:
+
+```
+[...]
+MACHINE = "cyclone5"
+PREFERRED_PROVIDER_virtual/kernel = "linux-socfpga-lts"
+PREFERRED_VERSION_linux-socfpga-lts = "5.15%"
+UBOOT_CONFIG = "de0-nano-soc"
+```
+
+Prethodnim varijablama definišemo platformu (varijabla `MACHINE`), recept koji želimo da koristimo za kernel
+(varijabla `PREFERRED_PROVIDER_virtual/kernel`) i verziju kernela za taj recept (varijabla `PREFERRED_VERSION_linux-socfpga-lts`),
+te *U-Boot* konfiguraciju (varijabla `UBOOT_CONFIG`).
+
+Sada je sve spremno za generisanje artifakata. Odabraćemo sliku sa minimalnim skupom programa koji su neophodni za pokretanje
+sistema (`core-image-minimal`).
+
+```
+bitbake core-image-minimal
+```
+
+> [!NOTE]
+> Kompletno *Yocto* okruženje zahtjeva oko 45GB prostora na disku, a za generisanje svih artifakata (uključujući
+*toolchain*) potrebno je nešto više od 4 sata (testirano na virtuelnoj mašini sa dva jezgra procesora i 3GB radne memorije).
+
+Po završetku *build* procesa, u okviru foldera `tmp/deploy/images/cyclone5` možemo pronaći relevantne slike koje su pogodne
+za kopiranje na SD karticu. U našem slučaju, svi fajlovi su zapakovani u okviru `core-image-minimal-cyclone5.wic` fajla čiji
+sadržaj možemo komandom `dd` direktno prebaciti na SD karticu.
+
+```
+cd tmp/deploy/images/cyclone5
+sudo dd if=core-image-minimal-cyclone5.wic of=/dev/sdb bs=1M
+```
+
+Nakon prebacivanja sadržaja na SD karticu, trebamo da je ubacimo u SD slot na ploči i da pokrenemo sistem. Dobićemo sljedeći
+ispis.
+
+```
+U-Boot SPL 2022.04 (Nov 10 2022 - 03:07:42 +0000)
+Trying to boot from MMC1
+
+
+U-Boot 2022.04 (Nov 10 2022 - 03:07:42 +0000)
+
+CPU:   Altera SoCFPGA Platform
+FPGA:  Altera Cyclone V, SE/A5 or SX/C5 or ST/D5, version 0x0
+BOOT:  SD/MMC Internal Transceiver (3.0V)
+       Watchdog enabled
+DRAM:  1 GiB
+Core:  22 devices, 13 uclasses, devicetree: separate
+MMC:   dwmmc0@ff704000: 0
+Loading Environment from MMC... *** Warning - bad CRC, using default environment
+
+In:    serial
+Out:   serial
+Err:   serial
+Model: Terasic DE-0(Atlas)
+Net:
+Error: ethernet@ff702000 address not set.
+No ethernet found.
+
+=>
+```
+
+S obzirom da u konfiguraciji nije definisana varijabla `bootcmd` u okviru *U-Boot* okruženja, proces podizanja *Linux*-a
+pokrećemo tako da eksplicitno pokrenemo skriptu `distro_bootcmd` koja će automatski pronaći i selektovati odgovarajući
+način podizanja (u datom slučaju SD kartica) i pokrenuti proces podizanja sistema.
+
+```
+run distro_bootcmd
+```
+
+Konačno, kada se pojavi poruka za logovanje, korisnik se može ulogovati sa `root` korisničkim imenom (nije potrebno unositi
+korisničku šifru).
