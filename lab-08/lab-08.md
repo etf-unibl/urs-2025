@@ -892,7 +892,7 @@ korisničku šifru).
 
 ### Kreiranje korisničkog sloja i izmjena postojećih recepata
 
-Da bismo uključili podršku za DE1-SoC ploÄču, koristićemo fajlove koje smo kreirali u prethodnim vježbama (predefinisana
+Da bismo uključili podršku za DE1-SoC ploču, koristićemo fajlove koje smo kreirali u prethodnim vježbama (predefinisana
 konfiguracija kernela i DTS fajl). Prvo ćemo napraviti izmjene u samoj konfiguraciji mašine za *Cyclone V* platformu,
 koja se nalazi u fajlu `meta-intel-fpga/conf/machine/cyclone5.conf`. U tom smislu, otvorite ovaj fajl u tekstualnom
 editoru i dodajte sljedeću liniju:
