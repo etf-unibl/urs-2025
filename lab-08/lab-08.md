@@ -890,7 +890,7 @@ run distro_bootcmd
 Konačno, kada se pojavi poruka za logovanje, korisnik se može ulogovati sa `root` korisničkim imenom (nije potrebno unositi
 korisničku šifru).
 
-### Kreiranje korisničkog sloja i izmjena postojećih recepata
+### Kreiranje korisničkog sloja i izmjena postojećih recepata
 
 Da bismo uključili podršku za DE1-SoC ploÄču, koristićemo fajlove koje smo kreirali u prethodnim vježbama (predefinisana
 konfiguracija kernela i DTS fajl). Prvo ćemo napraviti izmjene u samoj konfiguraciji mašine za *Cyclone V* platformu,
@@ -936,7 +936,7 @@ KERNEL_DEVICETREE ?= "\
 			"
 ```
 
-Sada ćemo kreirati korisnički sloj za *DE1-SoC* ploču koji ćemo iskoristiti da izmjenimo recepte kernela s ciljem dodavanja
+Sada ćemo kreirati korisnički sloj za *DE1-SoC* ploču koji ćemo iskoristiti da izmjenimo recepte kernela s ciljem dodavanja
 prethodno pomenutih fajlova.
 
 Pređite u folder `build-socfpga` i kreirajte novi sloj pod nazivom `meta-de1soc`.
@@ -959,7 +959,7 @@ cd ../meta-de1soc
 mkdir -p recipes-kernel/linux/files
 ```
 
-Kopirajte kernel konfiguraciju i DTS fajl za *DE1-SoC* ploču u folder `recipes-kernel/linux/files`. Zatim, kreirajte fajl za
+Kopirajte kernel konfiguraciju i DTS fajl za *DE1-SoC* ploču u folder `recipes-kernel/linux/files`. Zatim, kreirajte fajl za
 proširenje postojećeg recepta za *Linux*.
 
 ```
