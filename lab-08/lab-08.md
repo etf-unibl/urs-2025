@@ -889,3 +889,518 @@ run distro_bootcmd
 
 Konačno, kada se pojavi poruka za logovanje, korisnik se može ulogovati sa `root` korisničkim imenom (nije potrebno unositi
 korisničku šifru).
+
+### Kreiranje korisničkog sloja i izmjena postojećih recepata
+
+Da bismo uključili podršku za DE1-SoC ploÄču, koristićemo fajlove koje smo kreirali u prethodnim vježbama (predefinisana
+konfiguracija kernela i DTS fajl). Prvo ćemo napraviti izmjene u samoj konfiguraciji mašine za *Cyclone V* platformu,
+koja se nalazi u fajlu `meta-intel-fpga/conf/machine/cyclone5.conf`. U tom smislu, otvorite ovaj fajl u tekstualnom
+editoru i dodajte sljedeću liniju:
+
+```
+UBOOT_CONFIG[de1-soc] = "socfpga_de1_soc_defconfig"
+```
+
+Dio konfiguracionog fajla mašine treba da ima izgled
+
+```
+UBOOT_CONFIG ??= "cyclone5-socdk"
+UBOOT_CONFIG[cyclone5-socdk] = "socfpga_cyclone5_defconfig"
+UBOOT_CONFIG[de0-nano-soc] = "socfpga_de0_nano_soc_defconfig"
+UBOOT_CONFIG[de10-nano-soc] = "socfpga_de10_nano_defconfig"
+UBOOT_CONFIG[mcvevk] = "socfpga_mcvevk_defconfig"
+UBOOT_CONFIG[sockit] = "socfpga_sockit_defconfig"
+UBOOT_CONFIG[socrates] = "socfpga_socrates_defconfig"
+UBOOT_CONFIG[sr1500] = "socfpga_sr1500_defconfig"
+UBOOT_CONFIG[de1-soc] = "socfpga_de1_soc_defconfig"
+```
+
+Takođe, u istom fajlu dopunite sadržaj varijable `KERNEL_DEVICETREE` sa
+
+```
+socfpga_cyclone5_de1_soc.dtb \
+```
+
+tako da ova varijabla ima sljedeći izgled:
+
+```
+KERNEL_DEVICETREE ?= "\
+			socfpga_cyclone5_socdk.dtb \
+			socfpga_cyclone5_sockit.dtb \
+			socfpga_cyclone5_socrates.dtb \
+			socfpga_cyclone5_de0_nano_soc.dtb \
+			socfpga_cyclone5_mcvevk.dtb \
+			socfpga_cyclone5_sodia.dtb \
+			socfpga_cyclone5_vining_fpga.dtb \
+			socfpga_cyclone5_de1_soc.dtb \
+			"
+```
+
+Sada ćemo kreirati korisnički sloj za *DE1-SoC* ploču koji ćemo iskoristiti da izmjenimo recepte kernela s ciljem dodavanja
+prethodno pomenutih fajlova.
+
+Pređite u folder `build-socfpga` i kreirajte novi sloj pod nazivom `meta-de1soc`.
+
+```
+bitbake-layers create-layer -p 7 ../meta-de1soc
+```
+
+> [!NOTE]
+> Napominjemo da svaki put kada koristite *BitBake* komande, potrebno je da prethodno kreirate *Yocto* okruženje korišćenjem
+komande `source poky/oe-init-build-env build-socfpga` u našem slučaju.
+
+Ova komanda će kreirati inicijalnu infrastrukturu sa oglednim receptom `recipes-example` koji služi kao primjer za kreiranje
+korisničkih recepata. Ovaj primjer nam neće biti potreban pa možete obrisati kompletan `recipes-example` folder.
+
+U prethodno kreiranom sloju, napravićemo repecte koji su nam neophodni za adekvatnu konfiguraciju kernela.
+
+```
+cd ../meta-de1soc
+mkdir -p recipes-kernel/linux/files
+```
+
+Kopirajte kernel konfiguraciju i DTS fajl za *DE1-SoC* ploču u folder `recipes-kernel/linux/files`. Zatim, kreirajte fajl za
+proširenje postojećeg recepta za *Linux*.
+
+```
+touch recipes-kernel/linux/linux-socfpga-lts_%.bbappend
+```
+
+Otvorite ovaj fajl i u njega dodajte sljedeći sadržaj:
+
+```
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
+
+do_kernel_metadata:prepend(){
+ cp ${WORKDIR}/de1_soc_defconfig ${S}/arch/arm/configs
+ cp ${WORKDIR}/socfpga_cyclone5_de1_soc.dts ${S}/arch/arm/boot/dts
+ echo "dtb-\$(CONFIG_ARCH_INTEL_SOCFPGA) += socfpga_cyclone5_de1_soc.dtb" >> ${S}/arch/arm/boot/dts/Makefile
+}
+
+KBUILD_DEFCONFIG = "de1_soc_defconfig"
+```
+
+Prva linija omogućava da prethodno kreirani `files` folder bude vidljiv u radnom direktorijumu okruženja. Narednih nekoliko linija
+realizuje kopiranje konfiguracije kernela i DTS fajla na odgovarajuće lokacija prije same konfiguracije i kompajliranja kernela.
+Osim toga, modifikujemo `Makefile` tako da omogućimo *build*-anje našeg DTS fajla. Konačno, posljednjom linijom redefinišemo
+varijablu `KBUILD_DEFCONFIG` kojom se selektuje predefinisana konfiguracija kernela.
+
+Struktura foldera našeg sloja bi trebalo da ima sljedeći izgled nakon prethodnih izmjena.
+
+```
+meta-de1soc/
+├── conf
+│   └── layer.conf
+├── COPYING.MIT
+├── README
+└── recipes-kernel
+    └── linux
+        ├── files
+        │   ├── de1_soc_defconfig
+        │   └── socfpga_cyclone5_de1_soc.dts
+        └── linux-socfpga-lts_%.bbappend
+```
+
+Da bi ovaj sloj bio vidljiv u *build* sistemu, potrebno je da ga dodamo kao što je ranije opisano.
+
+```
+cd ../build-socfpga
+bitbake-layers add-layer ../meta-de1soc
+```
+
+Konačno, da bi *root* fajl sistem sadržao i kernel module, potrebno je da u lokalnoj konfiguraciji (fajl `conf/local.conf`)
+dodamo sljedeću liniju:
+
+```
+MACHINE_ESSENTIAL_EXTRA_RDEPENDS += "kernel-modules"
+```
+
+Ostaje još da pokrenemo generisanje slike
+
+```
+bitbake core-image-minimal
+```
+
+a zatim da aktuelizujemo SD karticu sa novom slikom i pokrenemo sistem na ploči.
+
+Skrećemo pažnju da je u lokalnoj konfiguraciji i dalje selektovana *DE0-Nano-SoC* ploča. Iako smo omogućili konfiguraciju i za
+*DE1-SoC* ploču koja je podržana u *U-Boot* izvornom kodu, postoje određeni problemi sa korišćenom *U-Boot* verzijom, tako da
+ćemo za inicijalno podizanje ploče koristiti *DE0-Nano-SoC* konfiguraciju. Međutim, da bi u nastavku bio učitan odgovarajući
+*Device Tree* fajl, potrebno je prije podizanja *Linux*-a izmijeniti `fdtfile` varijablu *U-Boot* okruženja. Npr. možemo koristiti
+`editenv` komandu da postavimo vrijednost `fdtfile` varijable na `socfpga_cyclone5_de1_soc.dtb`. Nakon toga, pokrećemo proces
+podizanja sistema kao i ranije, komandom `run distro_bootcmd`.
+
+Kada se sistem podigne, ulogujte se i provjerite da li su drajveri za ADXL345 uređaj učitani kako treba i potvrdite da možete da
+pristupite svim uređajima koje smo pominjali tokom vježbi preko *sysfs* fajl sistema.
+
+### Korišćenje `recipetool` alata za proširenje postojećih recepata
+
+U prethodnoj sekciji smo vidjeli kako možemo ručno da proširimo i izmjenimo postojeći recept. Međutim, u okviru *Yocto* infrastrukture
+na raspolaganju imamo i alate koji mogu da automatizuju i olakšaju ovaj proces. Jedan takav alat je `recipetool`. Iskoristićemo ovaj
+alat da prilagodimo mrežnu konfiguraciju i postavimo željenu IP adresu za mrežni interfejs.
+
+S obzirom da *Yocto* podrazumijevano koristi *System V* inicijalizacioni sistem, kod kojeg se mrežna konfiguracija nalazi u fajlu
+`/etc/network/interfaces`, prvo ćemo kreirati ovaj fajl sa željenom konfiguracijom.
+
+Pretpostavićemo da se nalazimo u folderu `build-socfpga`.
+
+```
+touch ../myinterfaces
+```
+
+Otvorite ovaj fajl u editoru i dodajte sljedeći sadržaj:
+
+```
+# The loopback interface
+auto lo
+iface lo inet loopback
+
+# Wired interface
+auto eth0
+iface eth0 inet static
+	address 192.168.21.100
+	netmask 255.255.255.0
+	network 192.168.21.0
+	gateway 192.168.21.1
+```
+
+Ova konfiguracija podešava *loopback* interfejs i mrežni interfejs sa statičkom adresom.
+
+Da bismo ovaj fajl dodali u postojeći recept za mrežnu konfiguraciju, koji je sastavni dio *Poky* distribucije, najjednostavnije je
+koristiti sljedeću komandu:
+
+```
+recipetool appendfile ../meta-de1soc /etc/network/interfaces ../myinterfaces
+```
+
+Komanda `appendfile` će automatski da pronađe recept koji je zadužen za generisanje fajla `/etc/network/interfaces` u *root* fajl
+sistemu, a zatim generisati sve neophodne fajlove za proširenje recepta. Komanda takođe očekuje da specificiramo sloj u koji će
+ovo proširenje recepta biti sačuvano (`../meta-de1soc`), kao i fajl koji želimo dodati (`../myinterfaces`).
+
+> [!NOTE]
+> Alatka `recipetool` podržava i druge varijante izmjena, kao što su `appendsrcfile` i `appendsrcfiles`. Za više informacija možete
+da pokrenete `recipetool --help` komandu.
+
+Nakon pokretanja ove komande, trebalo bi da dobijete sljedeću strukturu foldera našeg sloja:
+
+```
+meta-de1soc/
+├── conf
+│   └── layer.conf
+├── COPYING.MIT
+├── README
+├── recipes-core
+│   └── init-ifupdown
+│       ├── init-ifupdown
+│       │   └── interfaces
+│       └── init-ifupdown_1.0.bbappend
+└── recipes-kernel
+    └── linux
+        ├── files
+        │   ├── de1_soc_defconfig
+        │   └── socfpga_cyclone5_de1_soc.dts
+        └── linux-socfpga-lts_%.bbappend
+```
+
+Odavde zaključujemo da recept zadužen za konfigurisanje mrežnog interfejsa ima naziv `init-ifupdown` i da se nalazi u `recipes-core`.
+
+Nakon postavljanja parametara mrežnog interfejsa, ostaje još da uključimo softverski paket `dropbear` koji će nam omogućiti pristup ploči
+preko SSH protokla, koji je neophodan za sljedeći dio vježbe. Ovaj softverski paket nije dio `core-image-minimal` slike, pa ga moramo
+uključiti kroz lokalnu konfiguraciju. U tom smislu, u fajl lokalne konfiguracije, dodajte sljedeću liniju:
+
+```
+IMAGE_INSTALL:append = " dropbear"
+```
+
+Sada možete ponovo pokrenuti *build* da bi dobili novu sliku SD kartice.
+
+```
+bitbake core-image-minimal
+```
+
+Ponovo pokrenite sistem na ploči i potvrdite da ploči možete pristupiti preko SSH protokola.
+
+### Kreiranje novog recepta pomoću `devtool` alata
+
+Kao i `recipetool`, alatka `devtool` nam služi za lakšu manipulaciju receptima. Međutim, ona posjeduje dodatne opcije koje nam olakšavaju
+postupak dodavanja novih softverskih paketa. Način korišćenja `devtool` alatke ćemo ilustrovati primjerom dodavanja *CANopenLinux* softverskog
+paketa.
+
+Prvo ćemo se pozicionirati u `yocto` folder i preuzeti izvorni kod sa *CANopenLinux* repozitorijuma. Uz pretpostavku da se nalazimo u `build-socfpga`
+folderu, potrebno je da pokrenemo sljedeću sekvencu komandi:
+
+```
+cd ..
+git clone --recurse-submodules https://github.com/CANopenNode/CANopenLinux
+cd CANopenLinux
+git checkout v4.0
+cd ..
+```
+
+Nakon toga, kreiraćemo lokalno radno okruženje pomoću `devtool` alatke koje nam služi za kreiranje potrebne infrastrukture i testiranje ispravnosti
+opisa recepta.
+
+```
+devtool create-workspace local-workspace
+```
+
+Na ovaj način smo kreirali radno okruženje pod nazivom `local-workspace` u istoimenom folderu. Ako pokrenete komandu `bitbake-layers show-layers`
+vidjećete da je ovo lokalno okruženje automatski dodano u *Yocto* sistem.
+
+```
+layer                 path                                      priority
+==========================================================================
+meta                  /home/mknezic/yocto/poky/meta             5
+meta-poky             /home/mknezic/yocto/poky/meta-poky        5
+meta-yocto-bsp        /home/mknezic/yocto/poky/meta-yocto-bsp   5
+meta-de1soc           /home/mknezic/yocto/meta-de1soc           7
+local-workspace       /home/mknezic/yocto/local-workspace       99
+meta-intel-fpga       /home/mknezic/yocto/meta-intel-fpga       6
+```
+
+To nam omogućava testiranje svih izmjena tokom rada sa `devtool` alatom.
+
+Novi recept dodajemo komandom
+
+```
+devtool add canopen ./CANopenLinux/
+```
+
+u okviru koje definišemo ime recept i lokaciju do izvornog koda. Provjerom pomoću komande
+
+```
+tree local-workspace
+```
+
+potvrđujemo da je kreiran novi recept u lokalnom okruženju.
+
+```
+local-workspace
+├── appends
+│   └── canopen_git.bbappend
+├── conf
+│   └── layer.conf
+├── README
+└── recipes
+    └── canopen
+        └── canopen_git.bb
+```
+
+Inicijalni sadržaj ovog recepta možemo izlistati komandom
+
+```
+cat local-workspace/recipes/canopen/canopen_git.bb
+```
+
+U našem slučaju dobijamo:
+
+```
+# Recipe created by recipetool
+# This is the basis of a recipe and may need further editing in order to be fully functional.
+# (Feel free to remove these comments when editing.)
+
+# WARNING: the following LICENSE and LIC_FILES_CHKSUM values are best guesses - it is
+# your responsibility to verify that the values are complete and correct.
+LICENSE = "Apache-2.0"
+LIC_FILES_CHKSUM = "file://CANopenNode/LICENSE;md5=3b83ef96387f14655fc854ddc3c6bd57 \
+                    file://LICENSE;md5=3b83ef96387f14655fc854ddc3c6bd57"
+
+SRC_URI = "git://github.com/CANopenNode/CANopenLinux;protocol=https;branch=master"
+
+# Modify these as desired
+PV = "1.0+git${SRCPV}"
+SRCREV = "87cfbac52bc67809be20ca03ef3533293e7f7c3a"
+
+S = "${WORKDIR}/git"
+
+# NOTE: this is a Makefile-only piece of software, so we cannot generate much of the
+# recipe automatically - you will need to examine the Makefile yourself and ensure
+# that the appropriate arguments are passed in.
+
+do_configure () {
+	# Specify any needed configure commands here
+	:
+}
+
+do_compile () {
+	# You will almost certainly need to add additional arguments here
+	oe_runmake
+}
+
+do_install () {
+	# NOTE: unable to determine what to put here - there is a Makefile but no
+	# target named "install", so you will need to define this yourself
+	:
+}
+```
+
+Jasno je da određen stvari trebamo prilagoditi u samom receptu. U tom smislu otvorite fajl `canopen_git.bb` u
+editoru i napravite sljedeće izmjene:
+
+1. potpuno obrišite funkciju `do_configure ()`,
+2. zadržite funkciju `do_compile ()` kakva jeste,
+3. u funkciji `do_install ()` dodajte liniju
+
+```
+install -D -m 0755 ${B}/canopend ${D}/usr/bin/canopend
+```
+
+4. opciono, obrište komentare (linije koje počinju sa `#`).
+
+Sada kompajlirajte *CANopenLinux* softverski paket u lokalnom okruženju
+
+```
+devtool build canopen
+```
+
+Ukoliko je kompajliranje prošlo bez greške, možete instalirati softver na ploču kako biste ga testirali (neophodno je
+da imate SSH konekciju sa pločom).
+
+```
+devtool deploy-target canopen root@192.168.21.100
+```
+
+Povežite se sa pločom preko SSH protokola (ili serijske veze) i provjerite da li instalirani softver radi kako treba.
+
+Kada završite sa testiranjem, opciono, možete da izbrišete instalirani softver sa ciljne platforme.
+
+```
+devtool undeploy-target canopen root@192.168.21.100
+```
+
+Ostaje još da završite proces kreiranja recepta `devtool` alatom. Međutim, `devtool` će se žaliti kako imate nekomitovane
+izmjene u *CANopenLinux* repozitorijumu zbog prelaska na tag v4.0. Jedan način da se ovo prevaziđe jeste da se vratite na
+*master* granu. Međutim, prije prelaska trebate da sačuvate *commit hash* vrijednost (`SRCREV` varijabla u samom receptu
+ili vrijednost koju dobijete komandom `git log` u repozitorijumu).
+
+```
+cd CANopenLinux
+git log (kopirajte git commit hash vrijednost)
+git checkout master
+cd ..
+devtool finish canopen meta-de1soc/recipes-core
+```
+
+Nakon `devtool finish` komande, kreirani recept će biti prebačen u sloj na specificiranu lokaciju (`meta-de1soc/recipes-core`).
+Ovo možemo potvrditi izlistavanjem sadržaja lokalnog radnog okruženja:
+
+```
+tree local-workspace
+```
+
+što daje
+
+```
+local-workspace
+├── appends
+├── conf
+│   └── layer.conf
+├── README
+└── recipes
+```
+
+odnosno našeg sloja:
+
+```
+tree meta-de1soc
+```
+
+čime dobijamo sljdeću strukturu foldera:
+
+```
+meta-de1soc
+├── conf
+│   └── layer.conf
+├── COPYING.MIT
+├── README
+├── recipes-core
+│   ├── canopen
+│   │   └── canopen_git.bb
+│   └── init-ifupdown
+│       ├── init-ifupdown
+│       │   └── interfaces
+│       └── init-ifupdown_1.0.bbappend
+└── recipes-kernel
+    └── linux
+        ├── files
+        │   ├── de1_soc_defconfig
+        │   └── socfpga_cyclone5_de1_soc.dts
+        └── linux-socfpga-lts_%.bbappend
+```
+
+Ako sada otvorimo `canopen_git.bb` u našem sloju, vidjećemo da je vrijednost varijable `SRCREV` promijenjena. To je zato
+što smo se prebacili na *master* granu. Da bi sve bilo kako treba, umetnite *commit hash* vrijednost taga v4.0 koju ste
+ranije kopirali.
+
+Sada možemo obrisati folder `CANopenLinux`, jer nam nije više potreban.
+
+```
+rm -rf ../CANopenLinux
+```
+
+*CANopenLinux* softverski paket je dio *Yocto* infrastrukture, pa ćemo pokušati da ga *build*-amo.
+
+```
+cd build-socfpga/
+bitbake -c clean canopen
+bitbake canopen
+```
+
+Sistem bi trebalo da prijavi grešku sa licencom, kao što je prikazano ispod.
+
+```
+ERROR: canopen-1.0+gitAUTOINC+87cfbac52b-r0 do_populate_lic: QA Issue: canopen: LIC_FILES_CHKSUM points to an invalid file: /home/mknezic/yocto/build-socfpga/tmp/work/cortexa9t2hf-neon-poky-linux-gnueabi/canopen/1.0+gitAUTOINC+87cfbac52b-r0/git/CANopenNode/LICENSE [license-checksum]
+ERROR: canopen-1.0+gitAUTOINC+87cfbac52b-r0 do_populate_lic: Fatal QA errors were found, failing task.
+ERROR: Logfile of failure stored in: /home/mknezic/yocto/build-socfpga/tmp/work/cortexa9t2hf-neon-poky-linux-gnueabi/canopen/1.0+gitAUTOINC+87cfbac52b-r0/temp/log.do_populate_lic.5593
+ERROR: Task (/home/mknezic/yocto/meta-de1soc/recipes-core/canopen/canopen_git.bb:do_populate_lic) failed with exit code '1'
+```
+
+Problem je u tome što *CANopenLinux* repozitorijum sadrži podmodule, koji nisu povučeni prilikom kloniranja repozitorijuma. moramo
+da stavimo do znanja *Yocto* sistemu da treba da radi sa podmodulima. U tom smislu, potrebno je izmijeniti varijablu `SRC_URI` tako
+da `git:/` zamijenimo sa `gitsm:/`.
+
+Kada ponovo pokrenete *build* proces, ova greška bi trebalo da nestane. Međutim, pojavljuje se još jedna, koja ima izgled kao što je
+dato ispod.
+
+```
+ERROR: canopen-1.0+gitAUTOINC+87cfbac52b-r0 do_package_qa: QA Issue: File /usr/bin/canopend in package canopen doesn't have GNU_HASH (didn't pass LDFLAGS?) [ldflags]
+ERROR: canopen-1.0+gitAUTOINC+87cfbac52b-r0 do_package_qa: Fatal QA errors were found, failing task.
+ERROR: Logfile of failure stored in: /home/mknezic/yocto/build-socfpga/tmp/work/cortexa9t2hf-neon-poky-linux-gnueabi/canopen/1.0+gitAUTOINC+87cfbac52b-r0/temp/log.do_package_qa.6291
+ERROR: Task (/home/mknezic/yocto/meta-de1soc/recipes-core/canopen/canopen_git.bb:do_package_qa) failed with exit code '1'
+```
+
+*Yocto* sistem zahtjeva da se dodaju `LDFLAGS` pri procesu kompajliranja. Ovo popravljamo dodavanjem sljedeće linije u recept
+softverskog paketa:
+
+```
+TARGET_CC_ARCH += "${LDFLAGS}"
+```
+
+Sada bi trebalo da možete da *build*-ate softverski paket bez problema.
+
+Ostaje još da uklonimo lokalno radno okruženje iz liste slojeva
+
+```
+bitbake-layers remove-layer local-workspace
+```
+
+i da dodamo naš novi paket u listu dodatnih paketa, tj. da izmjenimo varijablu `IMAGE_INSTALL` u lokalnoj konfiguraciji na
+sljedeći način:
+
+```
+IMAGE_INSTALL:append = " dropbear canopen"
+```
+
+Konačno, možemo da kreiramo novu sliku
+
+```
+bitbake core-image-minimal
+```
+
+i da je deponujemo na SD karticu za testiranje na ploči.
+
+### Zadatak za samostalnu izradu
+
+Potrebno je da integrišete i dodate u *Yocto* sistem softverski paket za testiranje ulaznih uređaja `evtest`.
+Recept za ovaj softverski paket je dio [`meta-openembedded`](git://git.openembedded.org/meta-openembedded) repozitorijuma.
+Recept se nalazi u sloju `meta-oe` u `recipes-test` grupi recepata.
