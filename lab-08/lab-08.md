@@ -1033,6 +1033,8 @@ podizanja sistema kao i ranije, komandom `run distro_bootcmd`.
 Kada se sistem podigne, ulogujte se i provjerite da li su drajveri za ADXL345 uređaj učitani kako treba i potvrdite da možete da
 pristupite svim uređajima koje smo pominjali tokom vježbi preko *sysfs* fajl sistema.
 
+Sačuvajte izmjene na granu u okviru repozitorijuma kursa.
+
 ### Korišćenje `recipetool` alata za proširenje postojećih recepata
 
 U prethodnoj sekciji smo vidjeli kako možemo ručno da proširimo i izmjenimo postojeći recept. Međutim, u okviru *Yocto* infrastrukture
@@ -1119,6 +1121,8 @@ bitbake core-image-minimal
 ```
 
 Ponovo pokrenite sistem na ploči i potvrdite da ploči možete pristupiti preko SSH protokola.
+
+Sačuvajte sve napravljene izmjene na granu u okviru repozitorijuma kursa.
 
 ### Kreiranje novog recepta pomoću `devtool` alata
 
@@ -1399,8 +1403,12 @@ bitbake core-image-minimal
 
 i da je deponujemo na SD karticu za testiranje na ploči.
 
+Sačuvajte izmjene na granu u okviru repozitorijuma kursa.
+
 ### Zadatak za samostalnu izradu
 
 Potrebno je da integrišete i dodate u *Yocto* sistem softverski paket za testiranje ulaznih uređaja `evtest`.
 Recept za ovaj softverski paket je dio [`meta-openembedded`](git://git.openembedded.org/meta-openembedded) repozitorijuma.
 Recept se nalazi u sloju `meta-oe` u `recipes-test` grupi recepata.
+
+Po završetku, sačuvajte sve izmjene na granu u sklopu repozitorijuma kursa kao što je to ranije opisano.
