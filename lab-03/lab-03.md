@@ -24,9 +24,9 @@ Za uspješno izvođenje laboratorijske vježbe potrebno je sljedeće:
 
 ## Instalacija neophodnog softvera
 
-### Instalacija *Quartus Prime 24.1 Lite Edition* softvera
+### Instalacija *Quartus Prime 23.1 Lite Edition* softvera
 
-Instalacioni fajl za *Quartus Prime 24.1 Lite Edition* se može preuzeti sa
+Instalacioni fajl za *Quartus Prime 23.1 Lite Edition* se može preuzeti sa
 [zvaničnog linka](https://www.intel.com/content/www/us/en/software-kit/795188/intel-quartus-prime-lite-edition-design-software-version-23-1-for-windows.html)
 kompanije *Intel*. Prilikom preuzimanja, izaberite operativni sistem (podržani su *Windows* i *Linux*) koji
 koristite na svom računaru. Ukoliko koristite *Linux* na virtuelnoj mašini, preporučuje se da preuzmete
@@ -38,7 +38,7 @@ alat za programiranje ploče). Ukoliko ste u nedoumici oko izbora pojedinih opci
 posavjetujte se sa predmetnim asistentom ili nastavnikom.
 
 > [!NOTE]
-> Svi primjeri prikazani u nastavku su bazirani na *Windows* instalaciji *Quartus Prime 24.1 Lite Edition*
+> Svi primjeri prikazani u nastavku su bazirani na *Windows* instalaciji *Quartus Prime 23.1 Lite Edition*
 softverskog paketa, ali koraci i izgled korisničkog interfejsa je ekvivalentan i u *Linux* okruženju.
 
 Podrazumijevana lokacija na kojoj će softver biti instaliran u *Windows* okruženju je `C:\intelFPGA_lite\23.1std`.
