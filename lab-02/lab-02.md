@@ -351,6 +351,11 @@ pravilima koji su definisani u sekciji "Predaja rezultata rada".
 *Autotools* skup alata se koristi prilikom (kros)kompajliranja kompleksnijih projekata. Ovdje ćemo ilustrovati
 njegovu primjenu na primjeru *third-party* biblioteke *SQLite3*.
 
+> [!NOTE]
+> Za korišćenje *Autotools* alata, potrebno je da imate instalirane sljedeće pakete: `pkgconf` i `pkg-config`.
+> Iako bi ovi paketi već trebalo da budu instalirani prilikom instalacije prethodno pomenutih paketa, nije naodmet
+> da provjerite da ih imate instaliranje prije izrade dijela vježbe koji slijedi.
+
 Prvo trebamo da preuzmemo i raspakujemo arhivu sa izvornim kodom *SQLite3* biblioteke.
 
 ```
@@ -390,7 +395,7 @@ Sada možemo kroskompajlirati testnu aplikaciju:
 
 ```
 cd sqlite-test
-export PKG CONFIG LIBDIR=$SYSROOT/usr/lib/pkgconfig
+export PKG_CONFIG LIBDIR=$SYSROOT/usr/lib/pkgconfig
 arm-linux-gcc $(pkg-config sqlite3 --cflags --libs) sqlite-test.c -o sqlite-test
 ```
 
