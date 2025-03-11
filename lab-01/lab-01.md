@@ -239,8 +239,8 @@ Prvo je potrebno klonirati repozitorijum kursa, a zatim preći u folder laborato
 vježbe u kojem se nalazi izvorni kod pokaznog programa `hello.c`.
 
 ```
-git clone https://github.com/etf-unibl/urs-2024
-cd urs-2024/lab-01/hello
+git clone https://github.com/etf-unibl/urs-2025
+cd urs-2025/lab-01/hello
 ```
 
 Sljedećom komandom krokompajliramo izvorni kod u izvršni fajl pod nazivom `hello`.
