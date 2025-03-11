@@ -353,8 +353,8 @@ njegovu primjenu na primjeru *third-party* biblioteke *SQLite3*.
 
 > [!NOTE]
 > Za korišćenje *Autotools* alata, potrebno je da imate instalirane sljedeće pakete: `pkgconf` i `pkg-config`.
-> Iako bi ovi paketi već trebalo da budu instalirani prilikom instalacije prethodno pomenutih paketa, nije naodmet
-> da provjerite da ih imate instaliranje prije izrade dijela vježbe koji slijedi.
+> Iako bi ovi paketi trebalo da budu dostupni nakon instalacije softverskih paketa u okviru prve vježbe, nije naodmet
+> da provjerite da ih imate instalirane prije izrade dijela vježbe koji slijedi.
 
 Prvo trebamo da preuzmemo i raspakujemo arhivu sa izvornim kodom *SQLite3* biblioteke.
 
