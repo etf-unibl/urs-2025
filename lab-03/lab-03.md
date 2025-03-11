@@ -555,6 +555,11 @@ Pojaviće se prozor za izbor i konfiguraciju interfejsa za debagovanje kao na sl
 
 ![debugger-autodetect](figs/debugger-autodetect.PNG)
 
+> [!IMPORTANT]
+> Ukoliko koristite softver u Linux okruženju, s obzirom da *USB Blaster* interfejs podrazumijevano može da koristi samo **root**
+> korisnik, potrebno je da napravite dodatne modifikacije u sistemu da biste omogućili pristup JTAG interfejsu za debagovanje
+> i ostalim  korisnicima. Instrukcije u ovom smislu se mogu pogledati na linku [Installing the Intel® FPGA Download Cable II Driver on Linux Systems](https://www.intel.com/content/www/us/en/docs/programmable/683719/current/installing-the-driver-on-linux-systems.html).
+
 U polju *Debug probe* trebalo bi da se nalazi *DE-SoC [USB-1]*. Ukoliko to nije slučaj, provjerite
 da je napajanje ploče uključeno i kliknite na *Refresh* dugme s desne strane. Zatim u sekciji
 *Target Configuration* kliknite na *Auto-detect Scan Chain* za detekciju uređaja. Konačno, kliknite
