@@ -10,7 +10,7 @@ ilustrovati korišćenjem `aptitude` *package manager*-a koji *Debian* bazirane
 distribucije (kao što je i *Ubuntu*). Za druge distribucije, potrebno je prilagoditi
 date komande.
 
-Za realizaciju vježbi će biti potreban editor izvornog koda. Slobodno možete isntalirati
+Za realizaciju vježbi će biti potreban editor izvornog koda. Slobodno možete instalirati
 bilo koji editor koji inače koristite (*Visual Studio Code*, *GEdit*, *QT Creator,
 *CodeBlocks*, *Vim*, *Emacs* itd.).
 
@@ -28,12 +28,18 @@ Ukoliko se to zahtijeva u zadatku vježbe, rezultati rada se dostavljaju
 preko *GitHub* platforme. U tom smislu, student treba da napravi zasebnu granu (od
 glavne *main* grane) čiji naziv treba da bude formiran na sljedeći način:
 
-`lab-0x-<broj_indeksa>-2024>`
+`lab-0x-<broj_indeksa>-2025>`
 
 Npr. ako student predaje rješenje za laboratorijsku vježbu 3, a njegov broj indeksa je
 12345/22, onda naziv grane treba da bude:
 
-`lab-03-12345/22-2024`
+`lab-03-12345/22-2025`
+
+> [!IMPORTANT]
+> Prilikom predaje vježbe vodite računa da ne komitujete generisane fajlove. U tom smislu,
+> pri dodavanju novih fajlova koji se komituju izbjegavajte korišćenje komande `git add .` i
+> pokušajte fajlove da dodajete selektivno, specificiranjem putanje do relevantnih fajlova/foldera
+> koje je neophodno predati.
 
 ## Sadržaj
 
