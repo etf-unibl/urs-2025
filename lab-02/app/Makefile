@@ -2,6 +2,7 @@ CFLAGS := -Wall -I./inc
 LDFLAGS_STATIC := -static -ltest -L./lib
 LDFLAGS_DYNAMIC := -ltest -L./lib
 STATIC := true
+DESTDIR ?= ./
 
 ifeq ($(STATIC),true)
 	LDFLAGS := $(LDFLAGS_STATIC)
@@ -13,6 +14,8 @@ endif
 
 app: src/app.o $(LIBS)
 	$(CROSS_COMPILE)gcc src/app.o -o $@ $(LDFLAGS)
+	mkdir -p $(DESTDIR)
+	cp app $(DESTDIR)
 
 src/app.o: src/app.c
 	$(CROSS_COMPILE)gcc -c $< $(CFLAGS) -o $@
