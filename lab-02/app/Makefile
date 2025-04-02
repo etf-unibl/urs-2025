@@ -1,6 +1,7 @@
 CFLAGS := -Wall -I./inc
 LDFLAGS := -ltest -L./lib
 STATIC ?= yes
+DESTDIR := .
 
 ifeq ($(STATIC), yes)
 	LDFLAGS += -static
@@ -10,7 +11,8 @@ else
 endif
 
 app: src/app.o $(LIBS)
-	$(CROSS_COMPILE)gcc src/app.o -o $@ $(LDFLAGS) 
+	mkdir $(DESTDIR)
+	$(CROSS_COMPILE)gcc src/app.o -o $(DESTDIR)/$@ $(LDFLAGS) 
 
 src/app.o: src/app.c
 	$(CROSS_COMPILE)gcc -c $< $(CFLAGS) -o $@

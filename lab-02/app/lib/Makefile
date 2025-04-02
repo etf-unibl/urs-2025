@@ -1,8 +1,8 @@
 CFLAGS := -Wall -I../inc
 SRCS_DIR := ../src
-STATIC=no
+STATIC := no
 
-ifeq($(STATIC), no)
+ifeq ($(STATIC),no)
 	FLAG := -fPIC
 endif
 
