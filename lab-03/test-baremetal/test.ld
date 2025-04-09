@@ -14,6 +14,7 @@ SECTIONS
     {
         *(.text*)
         *(.rodata*)
+		__text_end__ = .;    
     } > program
 
     /* .bss section which is used for uninitialized data */
@@ -31,7 +32,7 @@ SECTIONS
         __data_start__ = .;
         *(.data*);
         __data_end__ = .;
-    } > data
+    } > data AT > program
 
     /* stack section */
     .stack (NOLOAD):
@@ -40,7 +41,7 @@ SECTIONS
         . = . + __stack_size;
         . = ALIGN(8);
         __stack_start__ = .;
-    } > data
+    } > data 
 
     _end = . ;
 }
