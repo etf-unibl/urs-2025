@@ -12,6 +12,7 @@ SECTIONS
 {
 	.text :
     {
+    	*startup.o (.text)
         *(.text*)
         *(.rodata*)
     } > program
