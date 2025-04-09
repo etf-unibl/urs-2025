@@ -13,6 +13,7 @@ Description	: HPS_LED blinking example C program
 
 // Bit position of the HPS LED pin in the GPIO1 module
 #define HPS_LED		(24U)
+#define HPS_KEY 	(25U)
 
 // Busy-wait function
 static inline void spin(volatile int count)
@@ -27,12 +28,14 @@ int main(void)
 {
 	// HPS LED initial state is OFF
 	unsigned int led_state = 0;
+	int last_state = 0;
 
 	// Initialize the board (IOCSR, pinmux, and reset)
 	board_init();
 
 	// Set HPS LED as output pin
 	set_gpio_dir(GPIO_OUTPUT, HPS_LED);
+	set_gpio_dir(GPIO_INPUT, HPS_KEY);
 
 	while (1)
 	{
@@ -42,6 +45,21 @@ int main(void)
 		spin(250000);
 		// Toggle the LED state
 		led_state ^= 1;
+
+		if(read_gpio(HPS_KEY)==0)
+		{
+			last_state=0;
+			spin(150000);
+			while(1)
+			{
+				if(read_gpio(HPS_KEY)==1) last_state =1;
+				else if(read_gpio(HPS_KEY)==0 && last_state==1) break;
+				else asm("nop");
+
+			}
+
+
+		}
 	}
 
 	return 0;
