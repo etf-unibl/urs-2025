@@ -14,6 +14,7 @@ SECTIONS
     {
         *(.text*)
         *(.rodata*)
+        __text_end__ = .;        
     } > program
 
     /* .bss section which is used for uninitialized data */

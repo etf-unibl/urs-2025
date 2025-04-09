@@ -15,6 +15,7 @@ int main(void)
 {
 	int a = 4;
 	int b = 5;
+	static int sum = 10;
 
 	result = 0;
 
