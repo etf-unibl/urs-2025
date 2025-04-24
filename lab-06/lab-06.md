@@ -190,7 +190,7 @@ Prekinite proces podizanja sistema kako biste dobili pristup *U-Boot* konzoli, a
 (npr. korišćenjem komande `editenv bootargs`)
 
 ```
-root=/dev/nfs nfsroot=<server_ip>:/home/<user>/rootfs,nfsvers=3,tcp rw
+ip=<client_ip> root=/dev/nfs nfsroot=<server_ip>:/home/<user>/rootfs,nfsvers=3,tcp rw
 ```
 
 gdje su: `<user>` korisničko ime, `<server_ip>` IP adresa NFS servera i `<client_ip>` IP adresa ploče.
