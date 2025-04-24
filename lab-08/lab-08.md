@@ -711,6 +711,10 @@ već generisane ključeve, a zatim da javni ključ smjestite na *root* fajl sist
 Korišćenjem znanja o kreiranju *overlay*-a, smjestite javni ključ na *root* fajl sistem ciljne platforme kako biste
 omogućili pristup preko SSH protokola.
 
+> [!IMPORTANT]
+> Minimalna dužina generisanog RSA ključa za ispravnu komunikaciju sa *Dropbear* SSH serverom, treba da bude 4096.
+> Podrazumijevana dužina ključa (ukoliko nije eksplicitno specificirana pri korišćenju `ssh-keygen` alata) je 2048.
+
 > [!TIP]
 > Ukoliko ne možete da ostvarite komunikaciju sa *Dropbear* SSH serverom čak i ako ste sve podesili kako je
 opisano iznad, pokušajte na ciljnoj platformi da promijenite permisije komandama `chmod -R go-rwx /root` i
