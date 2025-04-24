@@ -31,7 +31,7 @@ na odgovarajuću granu:
 ```
 git clone https://gitlab.com/buildroot.org/buildroot.git
 cd buildroot
-git checkout 2024.2
+git checkout 2024.02
 ```
 
 Potvrdite da na razvojnom računaru imate instalirane sve [obavezne softverske pakete](https://buildroot.org/downloads/manual/manual.html#requirement-mandatory).
