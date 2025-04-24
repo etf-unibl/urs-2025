@@ -395,7 +395,7 @@ Sada možemo kroskompajlirati testnu aplikaciju:
 
 ```
 cd sqlite-test
-export PKG_CONFIG LIBDIR=$SYSROOT/usr/lib/pkgconfig
+export PKG_CONFIG_LIBDIR=$SYSROOT/usr/lib/pkgconfig
 arm-linux-gcc $(pkg-config sqlite3 --cflags --libs) sqlite-test.c -o sqlite-test
 ```
 
@@ -451,7 +451,7 @@ koristimo.
 ```
 rm -r *
 cmake .. -DCMAKE_C_COMPILER=$HOME/x-tools/arm-etfbl-linux-gnueabihf/bin/arm-linux-gcc
-cmake --build
+cmake --build .
 ```
 
 Komandu `rm -f *` unutar `build` foldera koristimo da bismo očistili sve fajlove dobijene na osnovu prethodne konfiguracije.
