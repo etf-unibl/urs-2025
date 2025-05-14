@@ -31,7 +31,7 @@ na odgovarajuću granu:
 ```
 git clone https://gitlab.com/buildroot.org/buildroot.git
 cd buildroot
-git checkout 2024.2
+git checkout 2024.02
 ```
 
 Potvrdite da na razvojnom računaru imate instalirane sve [obavezne softverske pakete](https://buildroot.org/downloads/manual/manual.html#requirement-mandatory).
@@ -710,6 +710,10 @@ Da biste mogli da se konektujete na ploču preko SSH servera, potrebno je da gen
 već generisane ključeve, a zatim da javni ključ smjestite na *root* fajl sistem u fajl `/root/.ssh/authorized_keys`.
 Korišćenjem znanja o kreiranju *overlay*-a, smjestite javni ključ na *root* fajl sistem ciljne platforme kako biste
 omogućili pristup preko SSH protokola.
+
+> [!IMPORTANT]
+> Minimalna dužina generisanog RSA ključa za ispravnu komunikaciju sa *Dropbear* SSH serverom, treba da bude 4096.
+> Podrazumijevana dužina ključa (ukoliko nije eksplicitno specificirana pri korišćenju `ssh-keygen` alata) je 2048.
 
 > [!TIP]
 > Ukoliko ne možete da ostvarite komunikaciju sa *Dropbear* SSH serverom čak i ako ste sve podesili kako je
