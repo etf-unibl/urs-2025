@@ -1,0 +1,7 @@
+linux_load_address=0x1000000
+linux_dtb_load_address=0x02000000
+linux_dtb=socfpga_cyclone5_de1_soc.dtb
+linux_load=mmc rescan; fatload mmc 0:1 ${linux_load_address} zImage; fatload mmc 0:1 ${linux_dtb_load_address} ${linux_dtb}
+bootargs=console=ttyS0,115200 root=/dev/mmcblk0p3 rw rootwait
+bootcmd=run linux_load; bootz ${linux_load_address} - ${linux_dtb_load_address}
+bootdelay=1
