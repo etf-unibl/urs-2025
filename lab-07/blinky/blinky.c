@@ -52,15 +52,19 @@ int main(void)
     hps_led_port_addr = (unsigned int *)(virtual_base + GPIO1_REGS_DATA_OFFSET);
     
     // Set HPS_LED direction to be output
-    /* TODO : Add your code here */
+    
+    *hps_led_dir_addr |= (1 << HPS_LED_PIN);
+
     
     // Turn the HPS_LED off initially
-    /* TODO : Add your code here */
+
+    *hps_led_port_addr = *hps_led_port_addr & (0 << HPS_LED_PIN);
 
     // Loop infinitely and toggle the HPS_LED every 0.5 seconds
     while(1)
     {
-        /* TODO : Add your code here */
+        *hps_led_port_addr ^= (1 << HPS_LED_PIN);
+        usleep(500000);
     }
 
     // Unmap previously mapped virtual address space
