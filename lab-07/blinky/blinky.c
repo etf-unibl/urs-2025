@@ -60,7 +60,7 @@ int main(void)
 
     *hps_led_port_addr = *hps_led_port_addr & (0 << HPS_LED_PIN);
 
-    // Loop infinitely and toggle the HPS_LED every 0.5 seconds
+    // Loop infinitely and toggle the HPS_LED every 0.5 second
     while(1)
     {
         *hps_led_port_addr ^= (1 << HPS_LED_PIN);
