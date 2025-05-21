@@ -1,0 +1,7 @@
+config BR2_PACKAGE_CANOPEN
+	bool "canopen"
+	help
+	  This software is CANopenNode implementation on
+	  Linux devices
+
+	  https://github.com/CANopenNode/CANopenLinux
