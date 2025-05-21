@@ -40,10 +40,10 @@
 	gpio-keys {
 		compatible = "gpio-keys";
 
-		hps_key {
-			label = "hps_hkey0";
-			gpios = <&portb 25 0>;	/* HPS_GPI8 */
-			linux,code = <16>;	/* KEY_F17 */
+		hps_hkey {
+			label = "hps_key";
+			gpios = <&portb 25 1>;	/* HPS_GPI54 */
+			linux,code = <16>;	/* KEY_Q */
 		};
 
 	};
