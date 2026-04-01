@@ -200,7 +200,7 @@ Ponovite prethodne korake, pri čemu je programima `gcc` i `ar` potrebno dodati 
 
 > [!NOTE]
 Osim eksportovanja putanje do *toolchain* alata, skripta `set-environment.sh` podešava i
-druge varijable (`CROSS_COMPILE`, `ARCH` i `SYSROOT) koje se koriste u drugim skriptama ili prilikom
+druge varijable (`CROSS_COMPILE`, `ARCH` i `SYSROOT`) koje se koriste u drugim skriptama ili prilikom
 automatizacije procesa kroskompajliranja (npr. skripta `list-libs.sh` koristi varijablu `CROSS_COMPILE`).
 
 Nakon što generišete neophodne fajlove, trebate ih prekopirati na SD karticu za izvršavanje na ciljnoj
