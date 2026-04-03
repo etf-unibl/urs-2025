@@ -10,8 +10,9 @@ __stack_size = 0x2000;
 /* Section Definitions */
 SECTIONS
 {
-	.text :
+    .text :
     {
+	*startup.o (.text)
         *(.text*)
         *(.rodata*)
     } > program

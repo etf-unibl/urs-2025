@@ -14,7 +14,16 @@ SECTIONS
     {
         *(.text*)
         *(.rodata*)
+	__text_end__ = .;
     } > program
+
+    /* .data section which is used for initialized data */
+    .data :
+    {
+        __data_start__ = .;
+        *(.data*);
+        __data_end__ = .;
+    } > data AT > program
 
     /* .bss section which is used for uninitialized data */
     .bss (NOLOAD) :
@@ -23,14 +32,6 @@ SECTIONS
         *(.bss*)
         *(COMMON)
         __bss_end__ = .;
-    } > data
-
-    /* .data section which is used for initialized data */
-    .data :
-    {
-        __data_start__ = .;
-        *(.data*);
-        __data_end__ = .;
     } > data
 
     /* stack section */
