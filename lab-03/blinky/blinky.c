@@ -11,10 +11,9 @@ Description	: HPS_LED blinking example C program
 #include "board_init.h"
 #include "gpio.h"
 
-// Bit position of the HPS LED pin in the GPIO1 module
 #define HPS_LED		(24U)
+#define HPS_KEY		(25U)
 
-// Busy-wait function
 static inline void spin(volatile int count)
 {
 	while (count--)
@@ -25,26 +24,45 @@ static inline void spin(volatile int count)
 
 int main(void)
 {
-	// HPS LED initial state is OFF
-	unsigned int led_state = 0;
+	unsigned int led_state   = 0;
+	unsigned int blinking    = 1;   // 1 = is blinking, 0 = turned off
+	unsigned int key_prev    = 1;   // previous button state ,not pressed=HIGH
+	unsigned int key_current    = 1;   // current button state
 
-	// Initialize the board (IOCSR, pinmux, and reset)
 	board_init();
 
-	// Set HPS LED as output pin
+	// LED set to output
 	set_gpio_dir(GPIO_OUTPUT, HPS_LED);
+	// KEY set to input
+	set_gpio_dir(GPIO_INPUT, HPS_KEY);
 
 	while (1)
 	{
-		// Update HPS LED state
-		write_gpio(HPS_LED, led_state);
-		// Wait for approximately 0.5s
-		spin(250000);
-		// Toggle the LED state
-		led_state ^= 1;
+		// Read current button state
+		key_current = read_gpio(HPS_KEY);
+
+		// Detect lower edge HIGH -> LOW = button has been pressed
+		if (key_prev == 1 && key_current == 0)
+		{
+			blinking ^= 1;   // toggle blinking
+		}
+
+		// Save previous button state
+		key_prev = key_current;
+
+		if (blinking)
+		{
+			write_gpio(HPS_LED, led_state);
+			spin(250000);
+			led_state ^= 1;
+		}
+		else
+		{
+			// blinking is off so turn the LED off
+			write_gpio(HPS_LED, 0);
+			spin(10000);   // pause before checking state
+		}
 	}
 
 	return 0;
 }
-
-
