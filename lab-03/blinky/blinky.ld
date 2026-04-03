@@ -12,6 +12,7 @@ SECTIONS
 {
 	.text :
     {
+    	*startup.o(.text) 	/* force .text input section of startup.o to be mapped at the start of program section */
         *(.text*)
         *(.rodata*)
     } > program
