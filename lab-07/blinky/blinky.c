@@ -26,6 +26,7 @@ int main(void)
     volatile unsigned int* hps_led_port_addr = NULL;
     void* virtual_base;
     int fd;
+    int led_on;
 
     // Open /dev/mem
     fd = open("/dev/mem", (O_RDWR | O_SYNC));
@@ -54,13 +55,30 @@ int main(void)
     // Set HPS_LED direction to be output
     /* TODO : Add your code here */
     
+    *hps_led_dir_addr |= (1 << HPS_LED_PIN); // Check page 87 in user manual - 1 indicates the I/O direction is output
+    
     // Turn the HPS_LED off initially
     /* TODO : Add your code here */
+    
+    *hps_led_port_addr &= ~(1 << HPS_LED_PIN);
 
     // Loop infinitely and toggle the HPS_LED every 0.5 seconds
+    led_on = (0U);
     while(1)
     {
         /* TODO : Add your code here */
+        if (led_on)
+        {
+            *hps_led_port_addr |= (1 << HPS_LED_PIN);
+            led_on = (0U);
+        }
+        else
+        {
+            *hps_led_port_addr &= ~(1 << HPS_LED_PIN);
+            led_on = (1U);
+        }
+        
+        usleep(500000);
     }
 
     // Unmap previously mapped virtual address space
