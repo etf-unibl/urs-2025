@@ -1,18 +1,41 @@
-CFLAGS := -Wall -I./inc
-LDFLAGS := -static -ltest -L./lib
+CFLAGS  := -Wall -I./inc
+STATIC  ?= 1
+DESTDIR ?= .
+LIBS    := -L./lib -ltest
 
-app: src/app.o lib/libtest.a
-	$(CROSS_COMPILE)gcc src/app.o -o $@ $(LDFLAGS)
+APP_SRC := src/app.c
+APP_OBJ := src/app.o
 
-src/app.o: src/app.c
+
+ifeq ($(STATIC),1) # Static by default
+	LIB       := libtest.a
+    LDFLAGS   := -static
+else
+	LIB       := libtest.so
+    LDFLAGS   := 
+endif
+
+LIB_TARG := lib/$(LIB)
+
+app: $(APP_OBJ) $(LIB_TARG)
+	$(CROSS_COMPILE)gcc $(APP_OBJ) -o $@ $(LDFLAGS) $(LIBS)
+
+$(APP_OBJ): $(APP_SRC)
 	$(CROSS_COMPILE)gcc -c $< $(CFLAGS) -o $@
 
-lib/libtest.a:
-	$(MAKE) -C lib libtest.a
+lib/$(LIB):
+	$(MAKE) -C lib $(LIB) STATIC=$(STATIC)
+
+install:
+	mkdir -p $(DESTDIR)
+	cp app $(DESTDIR)/
+ifeq ($(STATIC),0)
+	cp $(LIB_TARG) $(DESTDIR)/
+endif
 
 clean:
-	rm -f app src/*.o
+	rm -rf app src/*.o
 	$(MAKE) -C lib clean
 
-.PHONY: clean
 
+.PHONY: clean
