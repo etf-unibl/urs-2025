@@ -11,10 +11,12 @@ Description	: Simple Cortex A9 bare-metal C program
 int counter = 0;
 int result;
 
+
 int main(void)
 {
 	int a = 4;
 	int b = 5;
+	static int sum = 10;
 
 	result = 0;
 
