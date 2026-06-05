@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-char* msg = "Hello GDB World! I received x.\n";
+char msg[] = "Hello GDB World! I received x.\n";
 
 int main(int argc, char *argv[])
 {
