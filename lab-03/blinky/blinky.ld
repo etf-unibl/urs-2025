@@ -11,9 +11,10 @@ __stack_size = 0x2000;
 SECTIONS
 {
 	.text :
-    {
-        *(.text*)
-        *(.rodata*)
+    {	
+    	*startup.o (.text)
+    	*(.text*)
+   		*(.rodata*)
     } > program
 
     /* .bss section which is used for uninitialized data */
@@ -31,7 +32,7 @@ SECTIONS
         __data_start__ = .;
         *(.data*);
         __data_end__ = .;
-    } > data
+    } > data AT > program
 
     /* stack section */
     .stack (NOLOAD):
